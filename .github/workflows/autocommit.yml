@@ -2,10 +2,11 @@ name: Auto-commit Activity
 
 on:
   schedule:
-    # Menjalankan skrip setiap menit
-    # PERINGATAN: Ini sangat tidak disarankan. 
-    - cron: '* * * * *'
-  
+    # JANGAN SETIAP MENIT. 
+    # Gunakan jadwal teman Anda ('0 1-23 * * *' = setiap jam kecuali jam 00)
+    # Atau sekali sehari, misal jam 7 pagi ('0 7 * * *')
+    - cron: '* * * * *' # Ini contoh: berjalan setiap 2 jam
+
   workflow_dispatch:
 
 jobs:
@@ -13,32 +14,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Langkah 1: Checkout kode
-      - name: Check out repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # Perlu token di sini agar push-action bisa menggunakannya
+          token: ${{ secrets.GITHUB_TOKEN }} 
 
-      # Langkah 2: Konfigurasi Git
+      # Langkah 2: Konfigurasi Git (Nama Anda)
       - name: Set up Git
         run: |
           git config --global user.name 'rifalfebiyan'
           git config --global user.email 'rifalfebiyan123@gmail.com'
 
-      # LANGKAH BARU: Membuat perubahan palsu
+      # Langkah 3: Membuat Perubahan Palsu (Seperti teman Anda)
       - name: Create Dummy Change
         run: |
           # Perintah ini akan menimpa file 'activity_log.txt' dengan waktu saat ini
-          # Ini DIJAMIN membuat perubahan file setiap kali skrip jalan
           echo "🤖 Activity generated on: $(date)" > activity_log.txt
 
-      # Langkah 3: Tambah, Commit, dan Push
-      - name: Add, Commit, and Push changes
+      # Langkah 4: Commit perubahan
+      - name: Commit changes
         run: |
-          # Hanya tambahkan file spesifik itu, jangan 'git add .'
-          git add activity_log.txt
+          # Tambahkan semua perubahan (termasuk file activity_log.txt)
+          git add -A
+          # Buat commit
+          git commit -m "Chore(bot): Scheduled auto-commit"
           
-          # Commit perubahan
-          git commit -m "Chore: Update activity log"
-          
-          # Dorong (push) perubahan ke branch utama
-          git push origin main
+      # Langkah 5: Push menggunakan Action Khusus (Paling Penting!)
+      - name: GitHub Push
+        uses: ad-m/github-push-action@master
+        with:
+          # Pastikan nama branch Anda 'main', bukan 'master'
+          branch: main
+          github_token: ${{ secrets.GITHUB_TOKEN }}
