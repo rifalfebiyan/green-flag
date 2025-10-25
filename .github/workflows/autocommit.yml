@@ -1,23 +1,21 @@
-name: Auto-commit Changes
+name: Auto-commit Activity
 
 on:
   schedule:
     # Menjalankan skrip setiap menit
+    # PERINGATAN: Ini sangat tidak disarankan. 
     - cron: '* * * * *'
   
-  # (Opsional) Tambahkan ini agar bisa dijalankan manual dari tab "Actions"
   workflow_dispatch:
 
 jobs:
   auto-commit:
     runs-on: ubuntu-latest
     steps:
-      # Langkah 1: Checkout kode repositori Anda
+      # Langkah 1: Checkout kode
       - name: Check out repository
         uses: actions/checkout@v4
         with:
-          # Kita perlu token agar Action ini bisa push kembali ke repo
-          # GITHUB_TOKEN dibuat otomatis oleh GitHub
           token: ${{ secrets.GITHUB_TOKEN }}
 
       # Langkah 2: Konfigurasi Git
@@ -26,21 +24,21 @@ jobs:
           git config --global user.name 'rifalfebiyan'
           git config --global user.email 'rifalfebiyan123@gmail.com'
 
+      # LANGKAH BARU: Membuat perubahan palsu
+      - name: Create Dummy Change
+        run: |
+          # Perintah ini akan menimpa file 'activity_log.txt' dengan waktu saat ini
+          # Ini DIJAMIN membuat perubahan file setiap kali skrip jalan
+          echo "🤖 Activity generated on: $(date)" > activity_log.txt
+
       # Langkah 3: Tambah, Commit, dan Push
       - name: Add, Commit, and Push changes
         run: |
-          # Tambahkan semua file yang berubah
-          git add .
+          # Hanya tambahkan file spesifik itu, jangan 'git add .'
+          git add activity_log.txt
           
-          # Cek apakah ada perubahan. Jika ya, baru commit.
-          if ! git diff --staged --quiet; then
-            # Ada perubahan, buat commit
-            git commit -m "Auto-commit: Sinkronisasi file otomatis $(date)"
-            
-            # Dorong (push) perubahan ke branch utama
-            # Pastikan 'main' sesuai dengan nama branch Anda (bisa juga 'master')
-            git push origin main
-          else
-            # Tidak ada perubahann
-            echo "Tidak ada perubahan untuk di-commit."
-          fi
+          # Commit perubahan
+          git commit -m "Chore: Update activity log"
+          
+          # Dorong (push) perubahan ke branch utama
+          git push origin main
