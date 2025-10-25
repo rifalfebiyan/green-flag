@@ -5,7 +5,7 @@ on:
     # JANGAN SETIAP MENIT. 
     # Gunakan jadwal teman Anda ('0 1-23 * * *' = setiap jam kecuali jam 00)
     # Atau sekali sehari, misal jam 7 pagi ('0 7 * * *')
-    - cron: '0 * * * *' # Ini contoh: berjalan setiap 2 jam
+    - cron: '0 */2 * * *' # Ini contoh: berjalan setiap 2 jam
 
   workflow_dispatch:
 
