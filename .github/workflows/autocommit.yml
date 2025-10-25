@@ -1,0 +1,46 @@
+name: Auto-commit Changes
+
+on:
+  schedule:
+    # Menjalankan skrip setiap menit
+    - cron: '* * * * *'
+  
+  # (Opsional) Tambahkan ini agar bisa dijalankan manual dari tab "Actions"
+  workflow_dispatch:
+
+jobs:
+  auto-commit:
+    runs-on: ubuntu-latest
+    steps:
+      # Langkah 1: Checkout kode repositori Anda
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          # Kita perlu token agar Action ini bisa push kembali ke repo
+          # GITHUB_TOKEN dibuat otomatis oleh GitHub
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Langkah 2: Konfigurasi Git
+      - name: Set up Git
+        run: |
+          git config --global user.name 'rifalfebiyan'
+          git config --global user.email 'rifalfebiyan123@gmail.com'
+
+      # Langkah 3: Tambah, Commit, dan Push
+      - name: Add, Commit, and Push changes
+        run: |
+          # Tambahkan semua file yang berubah
+          git add .
+          
+          # Cek apakah ada perubahan. Jika ya, baru commit.
+          if ! git diff --staged --quiet; then
+            # Ada perubahan, buat commit
+            git commit -m "Auto-commit: Sinkronisasi file otomatis $(date)"
+            
+            # Dorong (push) perubahan ke branch utama
+            # Pastikan 'main' sesuai dengan nama branch Anda (bisa juga 'master')
+            git push origin main
+          else
+            # Tidak ada perubahann
+            echo "Tidak ada perubahan untuk di-commit."
+          fi
